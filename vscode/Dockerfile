@@ -9,6 +9,9 @@
 #    --name vscode \
 #    jess/vscode
 
+# Now on one line for your copy-pasters:
+# docker run -d -v /tmp/.X11-unix:/tmp/.X11-unix -v $HOME:/home/computer -e DISPLAY=unix$DISPLAY --device /dev/dri --name vscode jess/vscode
+
 FROM debian:buster
 LABEL maintainer "Jessie Frazelle <jess@linux.com>"
 
@@ -48,12 +51,21 @@ RUN apt-get update && apt-get -y install \
 	libxrender1 \
 	libxss1 \
 	libxtst6 \
+	git \
+	python3.6 \
 	--no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
-ENV HOME /home/user
-RUN useradd --create-home --home-dir $HOME user \
-	&& chown -R user:user $HOME
+ENV HOME /home/computer
+RUN useradd --create-home --home-dir $HOME computer \
+	&& chown -R computer:computer $HOME
+
+RUN curl -sSL http://mirrors.kernel.org/ubuntu/pool/main/f/freetype/libfreetype6_2.8-0.2ubuntu2_amd64.deb -o /home/computer/freetype.deb
+RUN dpkg -i /home/computer/freetype.deb
+
+RUN /usr/bin/code --user-data-dir=/home/computer --install-extension ms-python.python
+RUN /usr/bin/code --user-data-dir=/home/computer --install-extension donjayamanne.git-extension-pack
+
 
 COPY start.sh /usr/local/bin/start.sh
 
